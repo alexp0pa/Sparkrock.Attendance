@@ -51,4 +51,4 @@ dotnet run --project src/AppHost --launch-profile http   # Aspire dashboard; Swa
 dotnet test                                               # Docker required for integration tests
 ```
 
-Generated with `dotnet new ca-simplified-api` from my personal .NET 8 Clean Architecture template, which is derived from Milan Jovanović's public template.
+Generated with `dotnet new ca-simplified-api` from my personal .NET 8 Clean Architecture template.
