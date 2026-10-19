@@ -15,6 +15,12 @@ Working conventions for this solution. Match them so generated code looks hand-w
 
 `tests/ArchitectureTests` enforces the layer rules — fix the dependency, never the test — and checks that the EF Core model has no changes missing a migration (`MigrationsTests`; fix it with `/add-migration`).
 
+## Legacy system (`legacy/`) — read-only reference
+
+- `legacy/` holds the old system. It is **read-only**: read it to understand existing behaviour, and cite `file:line` whenever you rely on it.
+- **Never edit it**, and **never port or wrap** any of its code in the new .NET projects. The new system is designed from scratch.
+- Enforced by `Edit`/`Write` deny rules on `legacy/**` in `.claude/settings.json`.
+
 ## Conventions
 
 - **CQRS, no MediatR** — `ICommand`/`ICommand<T>` + `ICommandHandler<...>`, `IQuery<T>` + `IQueryHandler<Q,R>`. Handlers are `internal sealed` with primary constructors, auto-registered by Scrutor scanning; wrapped by `ValidationDecorator` + `LoggingDecorator`.
@@ -25,6 +31,7 @@ Working conventions for this solution. Match them so generated code looks hand-w
 - **Time** — `IDateTimeProvider`, never `DateTime.UtcNow` in Application.
 - **List queries** return `PagedList<T>`.
 - **Decisions** — record significant architectural decisions as ADRs in `docs/adr/` (copy `0000-template.md`).
+- **`docs/adr/` is the source of truth for architectural decisions.** Follow the accepted ADRs; when code, skills or this file disagree with an ADR, the ADR wins — change a decision only with a new ADR that supersedes the old one.
 
 ## Build, run & test
 

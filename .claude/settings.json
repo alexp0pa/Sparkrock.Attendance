@@ -14,6 +14,12 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(docker ps:*)"
+    ],
+    "deny": [
+      "Edit(/legacy/**)",
+      "Write(/legacy/**)",
+      "Edit(legacy/**)",
+      "Write(legacy/**)"
     ]
   },
   "hooks": {

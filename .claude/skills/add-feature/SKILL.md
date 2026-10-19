@@ -26,6 +26,7 @@ Scaffold a full use case following this solution's conventions: an Application-l
 - **Validation lives in a `{Command}Validator`** (FluentValidation). It runs automatically via `ValidationDecorator` — the handler never validates input shape itself. Queries have no validators (the decorator only wraps commands).
 - **Data access via `IApplicationDbContext`** (from `Application.Abstractions.Data`) — never reference Infrastructure from Application.
 - **Ownership** for user-owned data: filter by `IUserContext.UserId`, or compare and return `UserErrors.Unauthorized()` on mismatch.
+- **Ids are `int`** for every entity except `User`/`RefreshToken` (`Guid`): commands/queries/errors/DTOs take `int`, create commands are `ICommand<int>` and return the database-generated id after `SaveChangesAsync`, routes use `{id:int}` (`docs/adr/0002-integer-entity-ids.md`).
 - **Time** comes from `IDateTimeProvider` — never `DateTime.UtcNow` in Application code.
 - **Queries project directly to a `{X}Response` DTO** with `.Select(...)` — never return domain entities. List queries return `PagedList<T>` when the result set is unbounded.
 - **Endpoints** implement `IEndpoint`, resolve the handler interface directly from DI, use `result.Match(Results.Ok, CustomResults.Problem)` (or `Results.NoContent` for void commands), tag with the `Tags` class, and call `.RequireAuthorization()` (or `.HasPermission(...)`).

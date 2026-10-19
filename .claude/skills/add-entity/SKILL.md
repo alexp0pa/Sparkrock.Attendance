@@ -17,7 +17,7 @@ namespace Domain.Projects;
 
 public sealed class Project
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public Guid OwnerId { get; set; }
     public string Name { get; set; }
     public bool IsArchived { get; set; }
@@ -26,7 +26,7 @@ public sealed class Project
 }
 ```
 
-Plain `sealed class` (no base class), `Guid Id`, settable properties, collections initialized with `= [];`. There are no domain events in this solution: side effects of a change happen explicitly in the command handler that makes it.
+Plain `sealed class` (no base class), `int Id` (database-generated identity — see `docs/adr/0002-integer-entity-ids.md`), settable properties, collections initialized with `= [];`. There are no domain events in this solution: side effects of a change happen explicitly in the command handler that makes it.
 
 2. **Error catalog** — `src/Domain/{Feature}/{Entity}Errors.cs`
 
@@ -37,7 +37,7 @@ namespace Domain.Projects;
 
 public static class ProjectErrors
 {
-    public static Error NotFound(Guid projectId) => Error.NotFound(
+    public static Error NotFound(int projectId) => Error.NotFound(
         "Projects.NotFound",
         $"The project with the Id = '{projectId}' was not found");
 }
@@ -71,6 +71,7 @@ internal sealed class ProjectConfiguration : IEntityTypeConfiguration<Project>
 ```
 
 SQL Server specifics:
+- `builder.HasKey(p => p.Id)` on an `int Id` becomes an `IDENTITY` column — never assign `Id` in code. Foreign keys to `User` stay `Guid` (`User`/`RefreshToken` keep their template Guid ids); foreign keys to other entities are `int` (`docs/adr/0002-integer-entity-ids.md`).
 - Give every `string` a `HasMaxLength(...)` — bounded columns document the domain's limits and index well; unbounded strings become max-length/`text` columns.
 - Uniqueness rules belong in a unique index here, in addition to any check in the handler.
 - Relationships are configured shadow-style (`HasOne<User>().WithMany()`) — entities hold foreign-key ids, not navigation properties. Configurations are picked up automatically by `ApplyConfigurationsFromAssembly`.

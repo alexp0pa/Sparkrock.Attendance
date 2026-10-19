@@ -33,7 +33,7 @@ public sealed class ArchiveProjectCommandHandlerTests : BaseHandlerTest
         userContext.UserId.Returns(UserId);
         IDateTimeProvider dateTimeProvider = Substitute.For<IDateTimeProvider>();
 
-        var command = new ArchiveProjectCommand(Guid.NewGuid());
+        var command = new ArchiveProjectCommand(999);
         var handler = new ArchiveProjectCommandHandler(context, dateTimeProvider, userContext);
 
         // Act
@@ -51,7 +51,6 @@ public sealed class ArchiveProjectCommandHandlerTests : BaseHandlerTest
         await using TestDbContext context = CreateDbContext();
         var project = new Project
         {
-            Id = Guid.NewGuid(),
             OwnerId = UserId,
             Name = "Archive me",
             CreatedAt = DateTime.UtcNow
@@ -134,7 +133,7 @@ public sealed class ProjectsTests(IntegrationTestWebAppFactory factory) : BaseIn
 
         HttpResponseMessage createResponse = await HttpClient.PostAsJsonAsync("projects", new { name = "Demo" });
         createResponse.EnsureSuccessStatusCode();
-        Guid projectId = await createResponse.Content.ReadFromJsonAsync<Guid>();
+        int projectId = await createResponse.Content.ReadFromJsonAsync<int>();
 
         // Act
         HttpResponseMessage response = await HttpClient.PutAsync($"projects/{projectId}/archive", null);

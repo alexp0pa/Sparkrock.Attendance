@@ -9,7 +9,7 @@ using Application.Abstractions.Messaging;
 
 namespace Application.Projects.GetById;
 
-public sealed record GetProjectByIdQuery(Guid ProjectId) : IQuery<ProjectResponse>;
+public sealed record GetProjectByIdQuery(int ProjectId) : IQuery<ProjectResponse>;
 ```
 
 Paged list: `public sealed record GetProjectsQuery(string? Search, int Page, int PageSize) : IQuery<PagedList<ProjectResponse>>;`
@@ -23,7 +23,7 @@ namespace Application.Projects.GetById;
 
 public sealed class ProjectResponse
 {
-    public Guid Id { get; set; }
+    public int Id { get; set; }
     public Guid OwnerId { get; set; }
     public string Name { get; set; }
     public bool IsArchived { get; set; }

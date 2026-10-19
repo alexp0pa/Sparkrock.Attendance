@@ -27,7 +27,7 @@ internal sealed class Create : IEndpoint
     {
         app.MapPost("projects", async (
             Request request,
-            ICommandHandler<CreateProjectCommand, Guid> handler,
+            ICommandHandler<CreateProjectCommand, int> handler,
             CancellationToken cancellationToken) =>
         {
             var command = new CreateProjectCommand
@@ -38,7 +38,7 @@ internal sealed class Create : IEndpoint
                 Tags = request.Tags
             };
 
-            Result<Guid> result = await handler.Handle(command, cancellationToken);
+            Result<int> result = await handler.Handle(command, cancellationToken);
 
             return result.Match(Results.Ok, CustomResults.Problem);
         })
@@ -63,8 +63,8 @@ internal sealed class Archive : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("projects/{id:guid}/archive", async (
-            Guid id,
+        app.MapPut("projects/{id:int}/archive", async (
+            int id,
             ICommandHandler<ArchiveProjectCommand> handler,
             CancellationToken cancellationToken) =>
         {
@@ -117,7 +117,7 @@ internal sealed class Get : IEndpoint
 
 ## Rules
 
-- Routes are lowercase, plural, no leading slash: `projects`, `projects/{id:guid}`, `users/{userId:guid}/projects`. Route constraints (`:guid`, `:int`, `:datetime`) on all typed parameters.
+- Routes are lowercase, plural, no leading slash: `projects`, `projects/{id:int}`, `users/{userId:guid}/projects`. Route constraints on all typed parameters: `:int` for entity ids (`docs/adr/0002-integer-entity-ids.md`), `:guid` only for user ids, `:datetime` for dates.
 - The nested `Request` class exists only when there's a JSON body; it maps 1:1 to the command inside the lambda (enum values arrive as `int` and are cast).
 - Resolve the handler interface (`ICommandHandler<...>` / `IQueryHandler<...>`) directly as a lambda parameter — the decorated instance is injected.
 - Always end with `.WithTags(Tags.{Feature})` and `.RequireAuthorization()` (or `.HasPermission(Permissions.X)` where a permission constant exists). Add the feature constant to `Tags.cs` if new.
