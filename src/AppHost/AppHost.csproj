@@ -5,6 +5,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <UserSecretsId>1f329180-0c50-44d3-a300-032dd55d9a3a</UserSecretsId>
+    <!-- Aspire 9.5 marks the dashboard prompt validation API as experimental; used by SeedStudentsCommand. -->
+    <NoWarn>$(NoWarn);ASPIREINTERACTION001</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,6 +17,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Migrator\Migrator.csproj" />
     <ProjectReference Include="..\Web.Api\Web.Api.csproj" />
+    <!-- A library, not an Aspire resource: the "Seed students" command runs DevelopmentDataSeeder in-process. -->
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" IsAspireProjectResource="false" />
   </ItemGroup>
 
 </Project>

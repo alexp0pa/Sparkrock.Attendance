@@ -1,6 +1,6 @@
 # 0009. Minimal Student entity
 
-- **Status:** Accepted
+- **Status:** Accepted (SchoolId amended by 0011)
 - **Date:** 2026-10-19
 
 ## Context

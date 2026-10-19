@@ -13,5 +13,8 @@ internal sealed class StudentConfiguration : IEntityTypeConfiguration<Student>
         builder.Property(s => s.FirstName).HasMaxLength(100);
 
         builder.Property(s => s.LastName).HasMaxLength(100);
+
+        // Plain int like AttendanceRecord.SchoolId: there is no school table (ADR 0008).
+        builder.HasIndex(s => s.SchoolId);
     }
 }

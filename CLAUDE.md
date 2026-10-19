@@ -37,7 +37,7 @@ Working conventions for this solution. Match them so generated code looks hand-w
 
 - `dotnet build` — **analyzer-strict**: `TreatWarningsAsErrors` + SonarAnalyzer. Keep code warning-clean; prefer collection expressions (`[.. x]`) and `ToUpperInvariant`.
 - `dotnet test` — integration tests use Testcontainers (SQL Server), so Docker must be running.
-- `dotnet run --project src/AppHost` — starts SQL Server + the API; the Aspire dashboard shows logs/traces; Swagger UI at `http://localhost:5000/swagger`. The Migrator applies migrations before the API starts.
+- `dotnet run --project src/AppHost` — starts SQL Server + the API; the Aspire dashboard shows logs/traces; Swagger UI at `http://localhost:5000/swagger`. The Migrator applies migrations before the API starts. For manual testing, the `Database` resource's **Seed students** command (dashboard) prompts for a school id and a count and adds demo students via `DevelopmentDataSeeder` (ADR 0011).
 - EF tooling is a pinned local tool: `dotnet tool restore`, then `dotnet tool run dotnet-ef ...` (see `/add-migration`).
 
 ## Claude Code setup (`.claude/`)

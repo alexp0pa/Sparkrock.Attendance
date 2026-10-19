@@ -4,24 +4,22 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Database;
 
-// Inserts demo students for local development (docs/adr/0009-student-entity.md): there is no roster API yet.
-// Called by the Migrator only in the Development environment - production migrations carry no demo data.
+// Inserts demo students for local development and manual testing (docs/adr/0009-student-entity.md,
+// docs/adr/0011-student-school-and-seed-command.md): there is no roster API yet.
+// Used by the Migrator (Development only) and by the AppHost's "Seed students" command - never in production.
 public sealed class DevelopmentDataSeeder(ApplicationDbContext dbContext, ILogger<DevelopmentDataSeeder> logger)
 {
-    private static readonly (string FirstName, string LastName)[] DemoStudents =
-    [
-        ("Ava", "Martin"),
-        ("Liam", "Tremblay"),
-        ("Olivia", "Roy"),
-        ("Noah", "Gagnon"),
-        ("Emma", "Côté"),
-        ("William", "Bouchard"),
-        ("Charlotte", "Gauthier"),
-        ("Lucas", "Morin"),
-        ("Amelia", "Lavoie"),
-        ("Benjamin", "Fortin")
-    ];
+    public const int DefaultSchoolId = 1;
+    public const int DefaultStudentCount = 10;
+    public const int MaxStudentsPerRun = 500;
 
+    private static readonly string[] FirstNames =
+        ["Ava", "Liam", "Olivia", "Noah", "Emma", "William", "Charlotte", "Lucas", "Amelia", "Benjamin"];
+
+    private static readonly string[] LastNames =
+        ["Martin", "Tremblay", "Roy", "Gagnon", "Côté", "Bouchard", "Gauthier", "Morin", "Lavoie", "Fortin"];
+
+    // Migrator start-up: seeds the default demo students once, when the table is empty.
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
         if (await dbContext.Students.AnyAsync(cancellationToken))
@@ -30,14 +28,35 @@ public sealed class DevelopmentDataSeeder(ApplicationDbContext dbContext, ILogge
             return;
         }
 
-        dbContext.Students.AddRange(DemoStudents.Select(s => new Student
+        await AddStudentsAsync(DefaultSchoolId, DefaultStudentCount, cancellationToken);
+    }
+
+    // Adds `count` demo students to `schoolId` and returns their ids, in insertion order.
+    public async Task<IReadOnlyList<int>> AddStudentsAsync(
+        int schoolId,
+        int count,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(schoolId, 1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(count, MaxStudentsPerRun);
+
+        // Continue the name sequence after the existing students, so repeated runs produce varied names.
+        int offset = await dbContext.Students.CountAsync(cancellationToken);
+
+        Student[] students = [.. Enumerable.Range(offset, count).Select(index => new Student
         {
-            FirstName = s.FirstName,
-            LastName = s.LastName
-        }));
+            SchoolId = schoolId,
+            FirstName = FirstNames[index % FirstNames.Length],
+            LastName = LastNames[(index + index / FirstNames.Length) % LastNames.Length]
+        })];
+
+        dbContext.Students.AddRange(students);
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation("Seeded {Count} development students", DemoStudents.Length);
+        logger.LogInformation("Seeded {Count} development students for school {SchoolId}", count, schoolId);
+
+        return [.. students.Select(s => s.Id)];
     }
 }
