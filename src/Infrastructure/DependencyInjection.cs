@@ -50,6 +50,8 @@ public static class DependencyInjection
 
         services.AddScoped<DatabaseMigrator>();
 
+        services.AddScoped<DevelopmentDataSeeder>();
+
         return services;
     }
 

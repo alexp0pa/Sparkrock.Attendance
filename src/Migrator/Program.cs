@@ -18,3 +18,9 @@ using IHost host = builder.Build();
 using IServiceScope scope = host.Services.CreateScope();
 
 await scope.ServiceProvider.GetRequiredService<DatabaseMigrator>().MigrateAsync();
+
+// Demo students for local development only; there is no roster API (docs/adr/0009-student-entity.md).
+if (builder.Environment.IsDevelopment())
+{
+    await scope.ServiceProvider.GetRequiredService<DevelopmentDataSeeder>().SeedAsync();
+}

@@ -1,4 +1,6 @@
 using Application.Abstractions.Data;
+using Domain.Attendance;
+using Domain.Students;
 using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,4 +17,7 @@ public sealed class TestDbContext(DbContextOptions<TestDbContext> options)
 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
 
+    public DbSet<Student> Students { get; set; }
+
+    public DbSet<AttendanceRecord> AttendanceRecords { get; set; }
 }

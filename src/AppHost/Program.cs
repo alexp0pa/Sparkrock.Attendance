@@ -7,7 +7,9 @@ IResourceBuilder<SqlServerDatabaseResource> database = builder.AddSqlServer("sql
     .AddDatabase("Database", "app");
 
 // The Migrator applies migrations once and exits; the API starts only after it completed successfully.
+// The Migrator has no launch profile, so pass the environment on explicitly: it seeds demo data only in Development.
 IResourceBuilder<ProjectResource> migrator = builder.AddProject<Projects.Migrator>("migrator")
+    .WithEnvironment("DOTNET_ENVIRONMENT", builder.Environment.EnvironmentName)
     .WithReference(database)
     .WaitFor(database);
 
