@@ -23,7 +23,7 @@
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.3" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.6" />
     <!-- Aspire (AppHost + ServiceDefaults) -->
-    <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.6.1" />
     <PackageVersion Include="Aspire.Hosting.SqlServer" Version="9.5.2" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.9.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.5.2" />
