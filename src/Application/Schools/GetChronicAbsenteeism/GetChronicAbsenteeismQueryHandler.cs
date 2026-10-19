@@ -27,25 +27,10 @@ internal sealed class GetChronicAbsenteeismQueryHandler(
         SchoolYear schoolYear = schoolYearResult.Value;
         int threshold = options.ChronicAbsenceThreshold;
 
-        // Computed from the daily records on every request; nothing is stored (ADR 0006).
-        // Counted per school (ADR 0008) and per school year (ADR 0005); excused and unexcused both count,
-        // Late and Present don't (ADR 0003, ADR 0006).
-        var absenceCounts = context.AttendanceRecords
-            .Where(r => r.SchoolId == query.SchoolId &&
-                        r.Date >= schoolYear.Start &&
-                        r.Date < schoolYear.EndExclusive &&
-                        (r.Status == AttendanceStatus.AbsentExcused || r.Status == AttendanceStatus.AbsentUnexcused))
-            .GroupBy(r => r.StudentId)
-            .Select(g => new
-            {
-                StudentId = g.Key,
-                Excused = g.Count(r => r.Status == AttendanceStatus.AbsentExcused),
-                Unexcused = g.Count(r => r.Status == AttendanceStatus.AbsentUnexcused),
-                Total = g.Count()
-            })
-            .Where(c => c.Total >= threshold);
-
-        List<ChronicallyAbsentStudentResponse> students = await absenceCounts
+        // Shared ADR 0006 calculation and threshold rule, filtered in SQL.
+        List<ChronicallyAbsentStudentResponse> students = await context.AttendanceRecords
+            .CountAbsences(query.SchoolId, schoolYear)
+            .WhereChronicallyAbsent(threshold)
             .Join(
                 context.Students,
                 c => c.StudentId,

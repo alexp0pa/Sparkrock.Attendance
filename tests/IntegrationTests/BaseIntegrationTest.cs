@@ -20,13 +20,13 @@ public abstract class BaseIntegrationTest
     protected IntegrationTestWebAppFactory Factory { get; }
 
     // Students have no API (docs/adr/0009-student-entity.md), so tests insert them directly.
-    protected async Task<int> CreateStudentAsync(string firstName = "Test", string lastName = "Student")
+    protected async Task<int> CreateStudentAsync(string firstName = "Test", string lastName = "Student", int schoolId = 1)
     {
         int studentId = 0;
 
         await UseDbAsync(async dbContext =>
         {
-            var student = new Student { FirstName = firstName, LastName = lastName };
+            var student = new Student { SchoolId = schoolId, FirstName = firstName, LastName = lastName };
             dbContext.Students.Add(student);
             await dbContext.SaveChangesAsync();
             studentId = student.Id;

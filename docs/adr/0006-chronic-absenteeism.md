@@ -16,6 +16,9 @@ The total is stored in a summary table. That stored total drifts from the daily 
 - Both `AbsentExcused` and `AbsentUnexcused` count. The response reports the two counts separately as well as the total. `Late` does not count (ADR 0003).
 - The flag is **computed from the daily records on every request**. Nothing is stored: there is no summary table and no alerts table.
 - The count covers a single school year (ADR 0005) and follows the legacy school scoping (ADR 0008).
+- Two endpoints expose the rule. Both share one calculation, `AbsenceCounting` in Application:
+  - **`GET students/{studentId}/chronic-absenteeism?schoolYear=`** returns one student's status: school year, excused, unexcused and total absences, the threshold, and whether they are chronically absent. It counts absences at the student's own school (`Student.SchoolId`, ADR 0011) and returns 404 for an unknown student.
+  - **`GET schools/{schoolId}/chronic-absenteeism?schoolYear=`** lists a school's chronically absent students, with the same counts per student.
 
 ## Alternatives considered
 
@@ -25,6 +28,8 @@ The total is stored in a summary table. That stored total drifts from the daily 
 ## Consequences
 
 - The result always matches the daily records, so corrections are reflected immediately.
+- The two endpoints always agree, because they share the counting query and the threshold check.
+- Absences recorded at another school don't count toward the student's status. A student who transfers mid-year therefore shows only the absences at their current school.
 - The query relies on an index on (StudentId, Date).
 - A count does not adjust for students who enrol late in the year; this was accepted on purpose.
 - Raising, resolving and notifying alerts are out of scope.
