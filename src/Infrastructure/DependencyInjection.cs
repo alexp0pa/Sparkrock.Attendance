@@ -1,6 +1,7 @@
 using System.Text;
 using Application.Abstractions.Authentication;
 using Application.Abstractions.Data;
+using Application.Attendance;
 using Infrastructure.Authentication;
 using Infrastructure.Authorization;
 using Infrastructure.Database;
@@ -22,14 +23,20 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration) =>
         services
-            .AddServices()
+            .AddServices(configuration)
             .AddDatabase(configuration)
             .AddAuthenticationInternal(configuration)
             .AddAuthorizationInternal();
 
-    private static IServiceCollection AddServices(this IServiceCollection services)
+    private static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+
+        // Bound and validated once at startup, so a bad setting fails fast instead of on a request.
+        AttendanceOptions attendanceOptions =
+            configuration.GetSection(AttendanceOptions.SectionName).Get<AttendanceOptions>() ?? new AttendanceOptions();
+        attendanceOptions.Validate();
+        services.AddSingleton(attendanceOptions);
 
         return services;
     }
@@ -47,6 +54,8 @@ public static class DependencyInjection
                     sqlServerOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Default)));
 
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+
+        services.AddSingleton<IDbExceptionClassifier, SqlServerExceptionClassifier>();
 
         services.AddScoped<DatabaseMigrator>();
 

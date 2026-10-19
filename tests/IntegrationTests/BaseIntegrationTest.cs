@@ -1,5 +1,8 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Domain.Students;
+using Infrastructure.Database;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace IntegrationTests;
 
@@ -8,10 +11,46 @@ public abstract class BaseIntegrationTest
 {
     protected BaseIntegrationTest(IntegrationTestWebAppFactory factory)
     {
+        Factory = factory;
         HttpClient = factory.CreateClient();
     }
 
     protected HttpClient HttpClient { get; }
+
+    protected IntegrationTestWebAppFactory Factory { get; }
+
+    // Students have no API (docs/adr/0009-student-entity.md), so tests insert them directly.
+    protected async Task<int> CreateStudentAsync(string firstName = "Test", string lastName = "Student")
+    {
+        int studentId = 0;
+
+        await UseDbAsync(async dbContext =>
+        {
+            var student = new Student { FirstName = firstName, LastName = lastName };
+            dbContext.Students.Add(student);
+            await dbContext.SaveChangesAsync();
+            studentId = student.Id;
+        });
+
+        return studentId;
+    }
+
+    // Reads persisted state that the API doesn't expose (e.g. audit columns).
+    protected async Task<T> QueryDbAsync<T>(Func<ApplicationDbContext, Task<T>> query)
+    {
+        using IServiceScope scope = Factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        return await query(dbContext);
+    }
+
+    private async Task UseDbAsync(Func<ApplicationDbContext, Task> action)
+    {
+        using IServiceScope scope = Factory.Services.CreateScope();
+        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        await action(dbContext);
+    }
 
     protected sealed record AccessTokens(string AccessToken, string RefreshToken);
 

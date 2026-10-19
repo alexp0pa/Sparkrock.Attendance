@@ -1,8 +1,11 @@
 using Infrastructure.Database;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using SharedKernel;
 using Testcontainers.MsSql;
 using Web.Api;
 
@@ -22,6 +25,12 @@ public sealed class IntegrationTestWebAppFactory : WebApplicationFactory<Program
         builder.UseSetting("Jwt:Issuer", "clean-architecture");
         builder.UseSetting("Jwt:Audience", "developers");
         builder.UseSetting("Jwt:ExpirationInMinutes", "60");
+
+        builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<IDateTimeProvider>();
+            services.AddSingleton<IDateTimeProvider, FixedDateTimeProvider>();
+        });
     }
 
     public async Task InitializeAsync()

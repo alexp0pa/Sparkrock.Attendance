@@ -32,6 +32,7 @@ See `docs/legacy-analysis.md` (R1–R5, B1, B3, B4, B10).
 ## Consequences
 
 - Legacy bugs B1, B3 and B4 cannot occur by design.
+- If two requests race to insert the first record for the same student and date, the unique index admits only one. The other request returns 409 `Attendance.ConcurrentSave` and can safely be retried.
 - "Today" comes from `IDateTimeProvider` (UTC). The school's time zone is not modelled; revisit this if schools in different time zones use the system.
 - There are no checks for weekends or holidays, because no school calendar exists. This matches legacy.
 - Corrections overwrite the existing record. Only the latest change is audited (ADR 0007).

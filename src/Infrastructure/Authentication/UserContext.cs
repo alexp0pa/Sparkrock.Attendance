@@ -1,4 +1,4 @@
-﻿using Application.Abstractions.Authentication;
+using Application.Abstractions.Authentication;
 using Microsoft.AspNetCore.Http;
 
 namespace Infrastructure.Authentication;
@@ -17,5 +17,12 @@ internal sealed class UserContext : IUserContext
             .HttpContext?
             .User
             .GetUserId() ??
+        throw new UserContextUnavailableException();
+
+    public string Email =>
+        _httpContextAccessor
+            .HttpContext?
+            .User
+            .GetEmail() ??
         throw new UserContextUnavailableException();
 }
